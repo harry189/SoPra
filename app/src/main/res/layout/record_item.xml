@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <!--
+         <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="6dip"
+        android:gravity="center_vertical"
+        android:src="@drawable/avd_tick_to_cross"/>
+
+            <TextView
+        android:id="@+id/record_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_toRightOf="@id/icon"
+        android:gravity="center_vertical"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true" />
+
+
+-->
+
+    <TextView
+        android:id="@+id/record_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="22dp"
+        android:padding="12dp"
+        android:layout_gravity="center_vertical"
+        android:text="Peter Parker" />
+
+</RelativeLayout>
