@@ -18,6 +18,7 @@ import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.example.sfirstapp.customwidget.CircleImageButton;
 import com.example.sfirstapp.db.NamesDbAdapter;
 
 import java.io.File;
@@ -29,7 +30,7 @@ public class RecordingActivity extends AppCompatActivity {
     private String newFileName;
     private MediaRecorder mRecorder = null;
     private Chronometer recordingTime;
-    private ImageView circle;
+    private CircleImageButton circle;
     private Drawable drawable, wrappedDrawable;
     private int accent, white;
     final Context context = this;
@@ -45,7 +46,7 @@ public class RecordingActivity extends AppCompatActivity {
         tmpRecording = getFilesDir().getAbsolutePath() + "/tmp.3gp";
         recordingTime = (Chronometer) findViewById(R.id.recording_time);
 
-        circle  = (ImageView) findViewById(R.id.recording_circle);
+        circle  = (CircleImageButton) findViewById(R.id.mic_button);
         drawable = circle.getDrawable();
         wrappedDrawable = DrawableCompat.wrap(drawable);
 
@@ -56,7 +57,50 @@ public class RecordingActivity extends AppCompatActivity {
         namesDbAdapter = new NamesDbAdapter(this);
         namesDbAdapter.open();
 
+        circle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRecord();
+                if (toStartRecording) {
+                    recordingTime.setBase(SystemClock.elapsedRealtime());
+                    recordingTime.start();
+                } else {
+                    dialog = new Dialog(context);
+                    dialog.setContentView(R.layout.dialog_stop_recording);
+                    dialog.setTitle("Aufnahme sichern");
+                    // if button is clicked, close the custom dialog
+                    final EditText recordingTitle = (EditText) dialog.findViewById(R.id.edit_title);
+                    Button discardButton = (Button) dialog.findViewById(R.id.dialogButtonDiscard);
+                    discardButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                        }
+                    });
+                    Button saveButton = (Button) dialog.findViewById(R.id.dialogButtonSave);
+                    saveButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            File file = new File(tmpRecording);
+                            String title = recordingTitle.getText().toString();
+                            String newFileName = context.getFilesDir() + "/" + title  + ".3gp";
+                            file.renameTo(new File(newFileName));
+                            namesDbAdapter.createRecording(title, "Europe", newFileName);
+                            dialog.dismiss();
+                        }
+                    });
 
+                    dialog.show();
+                    recordingTime.setBase(SystemClock.elapsedRealtime());
+                    wrappedDrawable.setTint(white);
+                }
+                toStartRecording = !toStartRecording;
+                Log.d(LOG_TAG, "Inside Circle");
+                }
+        });
+
+
+        /**
         //http://stackoverflow.com/questions/28090386/create-imageview-that-is-round-so-click-will-work-on-round-area-only-android
         circle.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -74,10 +118,10 @@ public class RecordingActivity extends AppCompatActivity {
                         + Math.pow(touchY - centerY, 2) < Math.pow(radius, 2)) {
                     onRecord();
                     if (toStartRecording) {
-                        /**
-                        wrappedDrawable.setTint(accent);
-                        circle.setImageDrawable(wrappedDrawable);
-                         **/
+
+                        //wrappedDrawable.setTint(accent);
+                        //circle.setImageDrawable(wrappedDrawable);
+
                         recordingTime.setBase(SystemClock.elapsedRealtime());
                         recordingTime.start();
                     } else {
@@ -119,7 +163,10 @@ public class RecordingActivity extends AppCompatActivity {
                 }
             }
         });
+         **/
     }
+
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
