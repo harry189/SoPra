@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.sfirstapp.model.NamesContract.RecordingEntry;
-import com.example.sfirstapp.model.Recording;
 
 /**
  * Created by Moritz on 21.10.2016.

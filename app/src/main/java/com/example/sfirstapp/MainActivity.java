@@ -19,22 +19,30 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+
+import com.example.sfirstapp.model.NamesContract;
+import com.example.sfirstapp.model.Recording;
+
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity implements OnRecordingSelectedListener {
+public class MainActivity extends AppCompatActivity implements Player,
+        MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnErrorListener,
+        MediaPlayer.OnCompletionListener {
 
-    private MediaPlayer mPlayer;
     private static final String LOG_TAG="MainActivity";
-    private int lastSelected = -1;
+    private MediaPlayer mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        initPlayer();
+
+        final Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        final TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("Collections"));
         tabLayout.addTab(tabLayout.newTab().setText("Recents"));
         tabLayout.addTab(tabLayout.newTab().setText("Unsorted"));
@@ -60,24 +68,17 @@ public class MainActivity extends AppCompatActivity implements OnRecordingSelect
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /**
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                 **/
-                startRecordActivity();
+
+                Intent intent = new Intent(MainActivity.this, RecordingActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    public void startRecordActivity() {
-        //Intent intent = new Intent(this, AudioRecordTest.class);
-        Intent intent = new Intent(this, RecordingActivity.class);
-        startActivity(intent);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnRecordingSelect
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
@@ -95,47 +96,64 @@ public class MainActivity extends AppCompatActivity implements OnRecordingSelect
 
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onResume() {
         super.onResume();
-        lastSelected = -1;
+    }
+
+    private void initPlayer() {
+        mPlayer = new MediaPlayer();
+        mPlayer.setOnPreparedListener(this);
+        mPlayer.setOnCompletionListener(this);
+        mPlayer.setOnErrorListener(this);
+    }
+    @Override
+    public void play(String fileName) {
+        mPlayer.reset();
+        try{
+            mPlayer.setDataSource(fileName);
+        }
+        catch(Exception e){
+            Log.e(LOG_TAG, "Exception setting recording", e);
+        }
+        mPlayer.prepareAsync();
+    }
+
+
+    @Override
+    public void play(Recording recording) {
+        this.play(recording.path);
     }
 
     @Override
-    public void onRecordingSelected(final int position, String fileName) {
-        if(lastSelected > -1) {
-            DbListFragment fragment = (DbListFragment) getSupportFragmentManager().findFragmentByTag("dbListFragment");
-            fragment.setColorAtPos(lastSelected);
-        }
-        lastSelected = position;
-        releasePlayer();
-        mPlayer = new MediaPlayer();
-        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                releasePlayer();
-                DbListFragment fragment = (DbListFragment) getSupportFragmentManager().findFragmentByTag("dbListFragment");
-                fragment.setColorAtPos(position);
-            }
-        });
-        try {
-            mPlayer.setDataSource(fileName);
-            mPlayer.prepare();
-            mPlayer.start();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "prepare() failed");
-        }
+    public void onCompletion(MediaPlayer mp) {
+        DbListFragment fragment = (DbListFragment) getSupportFragmentManager().findFragmentByTag("dbListFragment");
+        fragment.resetPrevItemText();
     }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        return false;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mPlayer.start();
+    }
+
     @Override
     public void onStop() {
-        super.onStop();
-        releasePlayer();
-    }
-
-    private void releasePlayer() {
         if(mPlayer!= null) {
             mPlayer.release();
             mPlayer = null;
         }
+        super.onStop();
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        initPlayer();
     }
 }

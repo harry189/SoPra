@@ -9,4 +9,5 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">All Collections</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="save_dialog_title">Aufnahme sichern</string>
 </resources>

@@ -1,12 +1,7 @@
 package com.example.sfirstapp;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +21,7 @@ public class SaveDialogFragment extends AppCompatDialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_stop_recording, container);
+        View view = inflater.inflate(R.layout.fragment_save_dialog, container);
         mEditText = (EditText) view.findViewById(R.id.edit_title);
 
         Button discardButton = (Button) view.findViewById(R.id.dialogButtonDiscard);
@@ -46,7 +41,7 @@ public class SaveDialogFragment extends AppCompatDialogFragment {
         });
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        getDialog().setTitle("Aufnahme sichern");
+        getDialog().setTitle(R.string.save_dialog_title);
         return view;
     }
 
@@ -56,7 +51,7 @@ public class SaveDialogFragment extends AppCompatDialogFragment {
         try {
             dialogListener = (SaveDialogListener) ctx;
         } catch (ClassCastException e) {
-            throw new ClassCastException(ctx.toString() + " must implement OnArticleSelectedListener");
+            throw new ClassCastException(ctx.toString() + " must implement SaveDialogListener");
         }
     }
 }

@@ -35,7 +35,6 @@ public class CircleImageButton extends AppCompatImageButton {
         return true;
     }
 
-
     public CircleImageButton(Context context) {
         super(context);
     }

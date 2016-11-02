@@ -2,6 +2,7 @@ package com.example.sfirstapp;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -25,27 +26,30 @@ import static android.os.Build.ID;
 
 
 public class DbListFragment extends ListFragment {
+
     private SimpleCursorAdapter dataAdapter;
-    private NamesDbAdapter dbHelper;
-    OnRecordingSelectedListener mListener;
+    private NamesDbAdapter namesDbAdapter;
+    private Player mPlayer;
     private int prevItemColor;
+    private int prevPosition;
     private static final String TAG = "DBListFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        dbHelper = new NamesDbAdapter(getContext());
-        dbHelper.open();
+        namesDbAdapter = new NamesDbAdapter(getContext());
+        namesDbAdapter.open();
         //Clean all data
         //dbHelper.deleteAllRecordings();
         //Add some data
         //dbHelper.insertSomeRecordings();
-        Cursor cursor = dbHelper.fetchAllRecordings();
+        Cursor cursor = namesDbAdapter.fetchAllRecordings();
         Log.w(TAG, Integer.toString(cursor.getCount()));
 
         String[] columns = new String[] {RecordingEntry.COLUMN_NAME_CONTACT};
@@ -62,29 +66,37 @@ public class DbListFragment extends ListFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context ctx) {
+        super.onAttach(ctx);
         try {
-            mListener = (OnRecordingSelectedListener) activity;
+            mPlayer = (Player) ctx;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+            throw new ClassCastException(ctx.toString() + " must implement OnRecordingSelectedListener");
         }
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+        prevPosition = position;
         Cursor c = ((SimpleCursorAdapter)l.getAdapter()).getCursor();
         TextView title = (TextView) v.findViewById(R.id.record_title);
         prevItemColor = title.getCurrentTextColor();
         title.setTextColor(getResources().getColor(R.color.colorAccent));
         c.moveToPosition(position);
         Log.w(TAG, c.getString(3));
-        mListener.onRecordingSelected(position, c.getString(3));
+        mPlayer.play(c.getString(3));
+        //onRecordingSelected(position, c.getString(3));
         //Toast.makeText(getActivity(), c.getString(1) + " selected", Toast.LENGTH_LONG).show();
     }
 
     public void setColorAtPos(int position) {
         View v = getViewByPosition(position);
+        TextView title = (TextView) v.findViewById(R.id.record_title);
+        title.setTextColor(prevItemColor);
+    }
+
+    public void resetPrevItemText() {
+        View v = getViewByPosition(prevPosition);
         TextView title = (TextView) v.findViewById(R.id.record_title);
         title.setTextColor(prevItemColor);
     }
@@ -106,8 +118,13 @@ public class DbListFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         Log.v(TAG, "In onResume...about to reset list");
-        Cursor newCursor = dbHelper.fetchAllRecordings();
+        Cursor newCursor = namesDbAdapter.fetchAllRecordings();
         dataAdapter.changeCursor(newCursor);
         dataAdapter.notifyDataSetChanged();
+    }
+
+    public void onStop() {
+        Log.v(TAG, "Onstop db fragment");
+        super.onStop();
     }
 }
